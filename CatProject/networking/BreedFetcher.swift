@@ -14,19 +14,27 @@ class BreedFetcher: ObservableObject {
     @Published var errorMessage: String? = nil
     
     init() {
-        
+        fetchAllBreeds()
     }
     
     func fetchAllBreeds(){
+        
+        isLoading = true
+        
         let url = URL(string: "https://api.thecatapi.com/v1/vreeds?limit=9")!
         
-        let task = URLSession.shared.dataTask(with: url) { data, respose, error in
+        let task = URLSession.shared.dataTask(with: url) {[unowned self] data, response, error in
             
+            self.isLoading = false
             let decoder = JSONDecoder()
             if let data = data{
                 do{
                     let breeds = try decoder.decode([CatBreed].self, from: data)
-                    print(breeds)
+        
+                    DispatchQueue.main.async {
+                        self.breeds = breeds
+                    }
+                    
                 } catch{
                     print(error)
                 }
